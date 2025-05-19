@@ -13,7 +13,7 @@ NIH_DISEASES = [
 ]
 
 CHEXPERT_DISEASES = [
-    'No Finding', 'Enlarged Cardiomediastinum', 'Cardiomegaly', 'Lung Opacity',
+    'Enlarged Cardiomediastinum', 'Cardiomegaly', 'Lung Opacity',
     'Lung Lesion', 'Edema', 'Consolidation', 'Pneumonia',
     'Atelectasis', 'Pneumothorax', 'Pleural Effusion', 'Pleural Other',
     'Fracture', 'Support Devices'
@@ -73,7 +73,11 @@ def main_create_sample(args):
         y_split = prepare_nih_labels_for_split(df, diseases)
         img_col = 'Image Index'
     else:
-        diseases = CHEXPERT_DISEASES
+        # Use custom disease list if provided
+        if args.disease_list_str:
+            diseases = [d.strip() for d in args.disease_list_str.split(',')]
+        else:
+            diseases = CHEXPERT_DISEASES
         y_split = prepare_chexpert_labels_for_split(df, diseases)
         img_col = 'Path'
     # Determine fraction
@@ -106,7 +110,9 @@ if __name__=="__main__":
     parser.add_argument("--sample_image_dir",required=True)
     parser.add_argument("--sample_fraction", type=float, default=None)
     parser.add_argument("--total_sample_size", type=int, default=None)
+    parser.add_argument("--disease_list_str", type=str, default=None, help="Comma-separated list of diseases to use (only for chexpert). Overrides default 13 diseases.")
     args = parser.parse_args()
+
 
     if not (args.sample_fraction or args.total_sample_size):
         parser.error("Specify --sample_fraction or --total_sample_size")
